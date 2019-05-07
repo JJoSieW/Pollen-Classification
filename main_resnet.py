@@ -3,7 +3,6 @@
 # Reference:
 - [Deep Residual Learning for Image Recognition](https://arxiv.org/abs/1512.03385)
 Adapted from code contributed by BigMoyan.
-------------------------------this code is NOT made by me, but i made a little change-------------------------
 '''
 from __future__ import print_function
 
