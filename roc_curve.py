@@ -51,7 +51,6 @@ pred_label = np.argmax(pred_prob, axis=1)
 print(pred_label)
 
 
-#9
 #calculate TPR and FPR
 '''TP=[[0]*21]*6
 TN=[[0]*21]*6
