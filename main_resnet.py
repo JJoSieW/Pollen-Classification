@@ -326,28 +326,38 @@ if __name__ == '__main__':
     
 
 #%%    
-#分为训练集和测试集
+#devide data set into train and test 
     pollens_image_num = len(x_pollens)
     pollens_image_index = np.arange(pollens_image_num)
-    train_index, test_index = train_test_split(pollens_image_index, test_size = 0.3)
+    train_index, test_index = train_test_split(pollens_image_index, test_size = 0.2)
     X_train = x_pollens[train_index]
     Y_train = y_pollens[train_index] 
     X_test = x_pollens[test_index]
     Y_test = y_pollens[test_index]
 
+#devide train dataset into train and validataion dataset
+    train_image_num = len(X_train)
+    train_image_index = np.arange(train_image_num)
+    train_index, validation_index = train_test_split(train_image_index, test_size = 0.1) #don't change, test_size => validation_size, in this line
+    X_train = x_pollens[train_index]
+    Y_train = y_pollens[train_index] 
+    X_validation = x_pollens[validation_index]
+    Y_validation = y_pollens[validation_index]
+
 #%%
 # subtract mean and normalize
     mean_image = np.mean(X_train)
-    #mean_image = mean_image.astype('uint8')
     mean_test = np.mean(X_test)
+    mean_validation = np.mean(X_validation)
     train_std = np.std(X_train)
     test_std = np.std(X_test)
-    np.subtract(X_test, mean_test, out=X_test, casting="unsafe")
-    np.divide(X_train,train_std, out=X_train, casting="unsafe")
-    np.divide(X_test, test_std, out=X_test, casting="unsafe")
-#    X_test -= mean_test
-#    X_train /= train_std
-#    X_test /= test_std
+    validation_std = np.std(X_validation)
+    X_train -= mean_image
+    X_test -= mean_test
+    X_validation -=mean_validation
+    X_train /= train_std
+    X_test /= test_std
+    X_validation /=validation_std
      
    # model = ResNet50(include_top=True, weights='imagenet') # training with pretrained model using this model
     model = resnet.ResnetBuilder.build_resnet_50((img_channels, img_cols, img_rows), nb_classes)# training with scratch model using this model
@@ -359,7 +369,7 @@ if __name__ == '__main__':
     model.fit(X_train, Y_train,
               batch_size=batch_size,
               nb_epoch=nb_epoch,
-              validation_data=(X_test, Y_test),
+              validation_data=(X_validation, Y_validation),
               shuffle=True,
               callbacks=[lr_reducer, early_stopper, csv_logger,checkpoint])
 
@@ -367,13 +377,16 @@ if __name__ == '__main__':
 #draw the training and val curve 
     ''' 
     plt.plot(history.history['acc'])
-    plt.plot(history.history['val_acc'])
+    plt.plot(history.histo
+    
+    ry['val_acc'])
     plt.title('model accuracy')
     plt.ylabel('accuracy')
     plt.xlabel('epoch')
     plt.legend(['train', 'test'], loc='lower right')
     plt.savefig(os.path.join('./',str(nb_epoch)+'_accuracy.png'))
     plt.close()
+    
 # summarize history for loss
     plt.plot(history.history['loss'])
     plt.plot(history.history['val_loss'])
@@ -384,3 +397,9 @@ if __name__ == '__main__':
     plt.savefig(os.path.join('./',str(nb_epoch) +'_val_loss.png'))
     plt.close()
     ''' 
+    
+#accuracy and loss
+test_loss, test_acc = model.evaluate(X_test, Y_test)
+
+print('Test accuracy:', test_acc)
+print('Test loss:',test_loss)
