@@ -1,4 +1,4 @@
-# tensorflow
+# Neural networks for pollen classification
 
 References:
 
